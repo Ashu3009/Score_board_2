@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Test 3</title>
+</head>
+<body>
+  <h1>Admin Panel</h1>
+
+  <h2>Main Timer</h2>
+  <button onclick="startMain()">Start</button>
+  <button onclick="pauseMain()">Pause</button>
+  <button onclick="resetMain()">Reset</button>
+  <div id="main_timer">03:00</div>
+
+  <h2>Penalty Timer</h2>
+  <button onclick="startPenalty()">Start Penalty</button>
+  <button onclick="pausePenalty()">Pause Penalty</button>
+  <button onclick="resetPenalty()">Reset Penalty</button>
+  <div id="penalty_timer">00:00</div>
+
+  <h2>Score</h2>
+  <button onclick="updateScore('red',1)">Red +1</button>
+  <button onclick="updateScore('red',-1)">Red -1</button>
+  <span id="score_red">0</span>
+
+  <button onclick="updateScore('blue',1)">Blue +1</button>
+  <button onclick="updateScore('blue',-1)">Blue -1</button>
+  <span id="score_blue">0</span>
+
+  <h2>Round: <span id="round">1</span></h2>
+  <button onclick="nextRound()">Next Round</button>
+
+  <script>
+    function formatTime(sec){
+      let m = Math.floor(sec/60);
+      let s = sec%60;
+      return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }
+
+    function update(){
+      fetch("/test_3/get_timer/")
+        .then(res=>res.json())
+        .then(data=>{
+          document.getElementById("main_timer").innerText = formatTime(data.main_timer);
+          document.getElementById("penalty_timer").innerText = formatTime(data.penalty_timer);
+          document.getElementById("score_red").innerText = data.team_red_score;
+          document.getElementById("score_blue").innerText = data.team_blue_score;
+          document.getElementById("round").innerText = data.round;
+        });
+    }
+
+    function startMain(){ fetch("/test_3/start_main/").then(update); }
+    function pauseMain(){ fetch("/test_3/pause_main/").then(update); }
+    function resetMain(){ fetch("/test_3/reset_main/").then(update); }
+
+    function startPenalty(){ fetch("/test_3/start_penalty/").then(update); }
+    function pausePenalty(){ fetch("/test_3/pause_penalty/").then(update); }
+    function resetPenalty(){ fetch("/test_3/reset_penalty/").then(update); }
+
+    function updateScore(team,delta){ fetch(`/test_3/update_score/${team}/${delta}/`).then(update); }
+    function nextRound(){ fetch("/test_3/next_round/").then(update); }
+
+    setInterval(update,1000);
+  </script>
+</body>
+</html>

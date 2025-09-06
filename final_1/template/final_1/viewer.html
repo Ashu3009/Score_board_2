@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Viewer</title>
+    <script>
+        async function fetchState() {
+            const res = await fetch("/final/get_state/");
+            const data = await res.json();
+
+            document.getElementById("game_timer").innerText = data.timers.game_timer.remaining;
+            document.getElementById("penalty_timer").innerText = data.timers.penalty_timer.remaining;
+
+            document.getElementById("round").innerText = data.state.round;
+            document.getElementById("team1").innerText = data.state.team1_name + ": " + data.state.team1_score;
+            document.getElementById("team2").innerText = data.state.team2_name + ": " + data.state.team2_score;
+        }
+        setInterval(fetchState, 1000);
+        window.onload = fetchState;
+    </script>
+</head>
+<body>
+    <h1>Game Viewer</h1>
+    <h2>Game Timer: <span id="game_timer">--</span> sec</h2>
+    <h2>Penalty Timer: <span id="penalty_timer">--</span> sec</h2>
+    <h2>Round: <span id="round">--</span></h2>
+    <h2><span id="team1">Team 1: 0</span></h2>
+    <h2><span id="team2">Team 2: 0</span></h2>
+</body>
+</html>

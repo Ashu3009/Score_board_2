@@ -1,0 +1,9 @@
+<h1>Live Scoreboard</h1>
+<h2 id="team1">{{ teams.team1.name }}: {{ teams.team1.score }}</h2>
+<h2 id="team2">{{ teams.team2.name }}: {{ teams.team2.score }}</h2>
+
+<script>
+function refresh() {
+    fetch("/teams/reset_score/../..") // galat hogaya abhi sirf idea hai
+}
+</script>

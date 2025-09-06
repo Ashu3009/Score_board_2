@@ -1,0 +1,18 @@
+{% extends "test_1/base.html" %}
+{% block content %}
+<h1>Live Viewer</h1>
+<h2 id="red">{{ state.team_red_name }}</h2>
+<h2 id="blue">{{ state.team_blue_name }}</h2>
+<h2>Timer: <span id="timer">{{ state.game_time }}</span> sec</h2>
+
+<script>
+async function fetchState(){
+  let res = await fetch("/test_1/api/state/");
+  let data = await res.json();
+  document.getElementById("red").innerText = data.team_red_name;
+  document.getElementById("blue").innerText = data.team_blue_name;
+  document.getElementById("timer").innerText = data.game_time;
+}
+setInterval(fetchState, 1000);  // every second fetch
+</script>
+{% endblock %}

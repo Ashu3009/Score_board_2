@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game Viewer</title>
+    <script>
+        async function fetchState() {
+            try {
+                const response = await fetch("/rpg/get_state/");
+                const data = await response.json();
+
+                // Timers
+                document.getElementById("game_timer").innerText = data.game_timer.remaining;
+                document.getElementById("penalty_timer").innerText = data.penalty_timer.remaining;
+
+                // Round
+                document.getElementById("round").innerText = data.round;
+
+                // Teams & Scores
+                document.getElementById("team1").innerText = data.team1_name + ": " + data.team1_score;
+                document.getElementById("team2").innerText = data.team2_name + ": " + data.team2_score;
+            } catch (error) {
+                console.error("Error fetching state:", error);
+            }
+        }
+
+        // har 1 second me update
+        setInterval(fetchState, 1000);
+        window.onload = fetchState;
+    </script>
+</head>
+<body>
+    <h1>Game Viewer</h1>
+
+    <h2>Game Timer: <span id="game_timer">--</span> seconds</h2>
+    <h2>Penalty Timer: <span id="penalty_timer">--</span> seconds</h2>
+
+    <h2>Round: <span id="round">--</span></h2>
+
+    <h2><span id="team1">Team 1: 0</span></h2>
+    <h2><span id="team2">Team 2: 0</span></h2>
+</body>
+</html>
