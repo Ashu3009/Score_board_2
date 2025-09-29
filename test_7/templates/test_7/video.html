@@ -1,0 +1,101 @@
+
+{% comment %} --------video with button auto play and loop----------- {% endcomment %}
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Video Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: black;
+        }
+        video {
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover; /* fullscreen cover */
+        }
+
+        /* Logo button style */
+        .logo-btn {
+            position: fixed;
+            top: 10px;
+            left: 33px;
+            z-index: 1000;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .logo-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+
+        .logo-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo button (redirect) -->
+    <button class="logo-btn" onclick="redirectToVideo()">
+        <img src="{% static 'test_7/photos/circular-logo.png' %}" alt="DroneNova Logo">
+    </button>
+    
+    <!-- Background video -->
+    <video id="myVideo" autoplay muted loop>
+        <source src="{% static 'test_7/videos/sample.mp4' %}" type="video/mp4">
+        Your browser does not support HTML video.
+    </video>
+
+    <script>
+        const video = document.getElementById("myVideo");
+
+        // Page load par play force karna (safety)
+        window.addEventListener("load", () => {
+            video.play().catch(err => console.log("Autoplay blocked:", err));
+        });
+
+        // Tab change/minimize → pause/play
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                video.pause();
+            } else {
+                video.play().catch(err => console.log("Autoplay blocked:", err));
+            }
+        });
+
+        // Hover par pause
+        video.addEventListener("mouseenter", () => {
+            video.pause();
+        });
+
+        // Hover hatne par play
+        video.addEventListener("mouseleave", () => {
+            video.play().catch(err => console.log("Autoplay blocked:", err));
+        });
+
+        // Redirect function
+        function redirectToVideo() {
+            window.location.href = "{% url 'viewer' %}";
+        }
+    </script>
+</body>
+</html>
+
+

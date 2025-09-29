@@ -18,13 +18,6 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
+    path("test_7/", include("test_7.urls")),  # include our app URL
     path('admin/', admin.site.urls),
-    path("timer/", include("timer.urls")),  # add this
-    path('teams/', include("teams.urls")),
-    path('rpg/', include("round_penality_game_timer.urls")),
-    path("final/", include("final_1.urls")),
-    path("test_1/", include("test_1.urls")),
-    path("test_2/", include("test_2.urls")),
-    path("test_3/", include("test_3.urls")),  # include our app URL
-    path('test_4/', include('test_4.urls')),   # naya app
 ]
