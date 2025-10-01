@@ -1,5 +1,3 @@
-{% comment %} --------------Corrected code without logo-------------- {% endcomment %}
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,13 +8,13 @@
   <h1>Admin Control</h1>
 
   <!-- Game Timer -->
-  <h2>Game Timer: <span id="game_timer">3:00</span></h2>
+  <h2>Game Timer: <span id="game_timer">2:30</span></h2>
   <button onclick="startGameTimer()">Start</button>
   <button onclick="pauseGameTimer()">Pause</button>
   <button onclick="resetGameTimer()">Reset</button>
 
   <!-- Penalty Timer -->
-  <h2>Penalty Timer: <span id="penalty_timer">0:10</span></h2>
+  <h2>Penalty Timer: <span id="penalty_timer">0:00</span></h2>
   <button onclick="startPenaltyTimer()">Start</button>
   <button onclick="pausePenaltyTimer()">Pause</button>
   <button onclick="resetPenaltyTimer()">Reset</button>
@@ -44,10 +42,9 @@
     <button onclick="changeScore('B',-1)">-B</button>
   </div>
 
-
-    <script>
-let gameDuration = 180; // seconds
-let penaltyDuration = 10;
+<script>
+let gameDuration = 150; // 2:30 minutes
+let penaltyDuration = 180; // 3:00 minutes
 
 let gameInterval = null;
 let penaltyInterval = null;
@@ -77,45 +74,26 @@ function formatTime(sec){
     return `${m}:${s.toString().padStart(2,'0')}`;
 }
 
-// Display helpers
-function displayGameTimer(){
-    if(!gameEndTime) return;
-    const remaining = Math.ceil((gameEndTime - Date.now())/1000);
-    document.getElementById("game_timer").innerText = formatTime(remaining);
-    localStorage.setItem("gameTimeDisplay", formatTime(remaining));
-}
-
-function displayPenaltyTimer(){
-    if(!penaltyEndTime) return;
-    const remaining = Math.ceil((penaltyEndTime - Date.now())/1000);
-    document.getElementById("penalty_timer").innerText = formatTime(remaining);
-    localStorage.setItem("penaltyTimeDisplay", formatTime(remaining));
-}
-
-function displayRound(){ document.getElementById("round").innerText = round; saveData(); }
-function displayScores(){
-    document.getElementById("scoreA").innerText = scoreA;
-    document.getElementById("scoreB").innerText = scoreB;
-    saveData();
-}
-
-// Game timer controls
+// Game timer controls (COUNT DOWN)
 function startGameTimer(){
     if(!gameRunning){
         gameRunning = true;
         localStorage.setItem("gameStatus","running");
         const remaining = parseInt(localStorage.getItem("gameTimeDisplaySeconds")) || gameDuration;
-        gameEndTime = Date.now() + remaining*1000;
+        gameEndTime = Date.now() + remaining * 1000;
         localStorage.setItem("gameEndTime", gameEndTime);
 
         gameInterval = setInterval(()=>{
             const rem = Math.ceil((gameEndTime - Date.now())/1000);
+            document.getElementById("game_timer").innerText = formatTime(rem);
+            localStorage.setItem("gameTimeDisplay", formatTime(rem));
+            localStorage.setItem("gameTimeDisplaySeconds", rem);
+            
             if(rem <= 0){
                 clearInterval(gameInterval);
-                gameRunning=false;
+                gameRunning = false;
                 localStorage.setItem("gameStatus","reset");
             }
-            displayGameTimer();
         }, 250);
     }
 }
@@ -126,72 +104,101 @@ function pauseGameTimer(){
         const remaining = Math.ceil((gameEndTime - Date.now())/1000);
         localStorage.setItem("gameTimeDisplaySeconds", remaining);
         localStorage.setItem("gameStatus","paused");
-        gameRunning=false;
+        gameRunning = false;
     }
 }
 
 function resetGameTimer(){
-    pauseGameTimer();
+    clearInterval(gameInterval);
+    gameRunning = false;
     gameEndTime = null;
     localStorage.removeItem("gameTimeDisplaySeconds");
     localStorage.removeItem("gameEndTime");
     localStorage.setItem("gameStatus","reset");
     document.getElementById("game_timer").innerText = formatTime(gameDuration);
+    localStorage.setItem("gameTimeDisplay", formatTime(gameDuration));
+    
+    // Reset scores too
     scoreA = 0;
     scoreB = 0;
     displayScores();
-    localStorage.setItem("gameTimeDisplay", formatTime(gameDuration));
 }
 
-// Penalty timer controls
+
+// Penalty timer controls (COUNT UP from 0 to 3:00)
 function startPenaltyTimer(){
     if(!penaltyRunning){
         penaltyRunning = true;
         localStorage.setItem("penaltyStatus","running");
-        const remaining = parseInt(localStorage.getItem("penaltyTimeDisplaySeconds")) || penaltyDuration;
-        penaltyEndTime = Date.now() + remaining*1000;
+        
+        // Get elapsed time if paused, otherwise start from 0
+        const elapsed = parseInt(localStorage.getItem("penaltyElapsedSeconds")) || 0;
+        penaltyEndTime = Date.now() + (penaltyDuration - elapsed) * 1000;
         localStorage.setItem("penaltyEndTime", penaltyEndTime);
 
         penaltyInterval = setInterval(()=>{
-            const rem = Math.ceil((penaltyEndTime - Date.now())/1000);
-            if(rem <= 0){
+            const remaining = Math.ceil((penaltyEndTime - Date.now())/1000);
+            const elapsed = penaltyDuration - remaining;
+            
+            document.getElementById("penalty_timer").innerText = formatTime(elapsed);
+            localStorage.setItem("penaltyTimeDisplay", formatTime(elapsed));
+            localStorage.setItem("penaltyElapsedSeconds", elapsed);
+            
+            if(elapsed >= penaltyDuration){
                 clearInterval(penaltyInterval);
-                penaltyRunning=false;
+                penaltyRunning = false;
                 localStorage.setItem("penaltyStatus","reset");
             }
-            displayPenaltyTimer();
         }, 250);
     }
 }
+
+// Initialize - Penalty timer starts at 0:00
+document.getElementById("penalty_timer").innerText = formatTime(0);
+localStorage.setItem("penaltyTimeDisplay", formatTime(0));
+
+
 
 function pausePenaltyTimer(){
     if(penaltyRunning){
         clearInterval(penaltyInterval);
         const remaining = Math.ceil((penaltyEndTime - Date.now())/1000);
-        localStorage.setItem("penaltyTimeDisplaySeconds", remaining);
+        const elapsed = penaltyDuration - remaining;
+        localStorage.setItem("penaltyElapsedSeconds", elapsed);
         localStorage.setItem("penaltyStatus","paused");
-        penaltyRunning=false;
+        penaltyRunning = false;
     }
 }
 
 function resetPenaltyTimer(){
-    pausePenaltyTimer();
+    clearInterval(penaltyInterval);
+    penaltyRunning = false;
     penaltyEndTime = null;
-    localStorage.removeItem("penaltyTimeDisplaySeconds");
+    localStorage.removeItem("penaltyElapsedSeconds");
     localStorage.removeItem("penaltyEndTime");
     localStorage.setItem("penaltyStatus","reset");
-    document.getElementById("penalty_timer").innerText = formatTime(penaltyDuration);
-    localStorage.setItem("penaltyTimeDisplay", formatTime(penaltyDuration));
+    document.getElementById("penalty_timer").innerText = formatTime(0);
+    localStorage.setItem("penaltyTimeDisplay", formatTime(0));
 }
 
 // Round control
 function nextRound(){ round++; displayRound(); }
 function prevRound(){ if(round>1) round--; displayRound(); }
 
+function displayRound(){ 
+    document.getElementById("round").innerText = round; 
+    saveData(); 
+}
+
 // Score control
 function changeScore(team, val){
-    if(team==='A'){ scoreA += val; if(scoreA<0) scoreA=0; }
-    else{ scoreB += val; if(scoreB<0) scoreB=0; }
+    if(team==='A'){ 
+        scoreA += val; 
+        if(scoreA<0) scoreA=0; 
+    } else { 
+        scoreB += val; 
+        if(scoreB<0) scoreB=0; 
+    }
 
     if(val>0){
         let audio = new Audio("/static/test_7/audio/score_3.mp3");
@@ -200,218 +207,23 @@ function changeScore(team, val){
     displayScores();
 }
 
-// Init display
-displayGameTimer();
-displayPenaltyTimer();
-displayRound();
-displayScores();
-</script>
-
-</body>
-</html>
-
-
-
-
-
-
-{% comment %} <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Admin Panel</title>
-</head>
-<body>
-  <h1>Admin Control</h1>
-
-  <!-- Game Timer -->
-  <h2>Game Timer: <span id="game_timer">3:00</span></h2>
-  <button onclick="startGameTimer()">Start</button>
-  <button onclick="pauseGameTimer()">Pause</button>
-  <button onclick="resetGameTimer()">Reset</button>
-
-  <!-- Penalty Timer -->
-  <h2>Penalty Timer: <span id="penalty_timer">0:10</span></h2>
-  <button onclick="startPenaltyTimer()">Start</button>
-  <button onclick="pausePenaltyTimer()">Pause</button>
-  <button onclick="resetPenaltyTimer()">Reset</button>
-
-  <!-- Round -->
-  <h2>Round: <span id="round">1</span></h2>
-  <button onclick="prevRound()">Previous</button>
-  <button onclick="nextRound()">Next</button>
-
-  <!-- Team Names -->
-  <h2>Teams</h2>
-  <input type="text" id="teamAName" value="Team A" onchange="saveData()">
-  <input type="text" id="teamBName" value="Team B" onchange="saveData()">
-
-  <!-- Scores -->
-  <h3>Scores</h3>
-  <div>
-    <span id="scoreA">0</span>
-    <button onclick="changeScore('A',1)">+A</button>
-    <button onclick="changeScore('A',-1)">-A</button>
-  </div>
-  <div>
-    <span id="scoreB">0</span>
-    <button onclick="changeScore('B',1)">+B</button>
-    <button onclick="changeScore('B',-1)">-B</button>
-  </div>
-
-
-  <script>
-let gameDuration = 180; // seconds
-let penaltyDuration = 10; // seconds
-
-let gameInterval = null;
-let penaltyInterval = null;
-
-let gameEndTime = null;
-let penaltyEndTime = null;
-
-let gameRunning = false;
-let penaltyRunning = false;
-
-let round = 1;
-let scoreA = 0, scoreB = 0;
-
-// Save state to localStorage
-function saveData(){
-    localStorage.setItem("round", round);
-    localStorage.setItem("teamAName", document.getElementById("teamAName").value);
-    localStorage.setItem("teamBName", document.getElementById("teamBName").value);
-    localStorage.setItem("scoreA", scoreA);
-    localStorage.setItem("scoreB", scoreB);
-
-    if(gameRunning && gameEndTime) localStorage.setItem("gameEndTime", gameEndTime);
-    if(penaltyRunning && penaltyEndTime) localStorage.setItem("penaltyEndTime", penaltyEndTime);
-}
-
-// Display helpers
-function formatTime(sec){
-    sec = Math.max(0, Math.floor(sec));
-    const m = Math.floor(sec/60), s = sec%60;
-    return `${m}:${s.toString().padStart(2,'0')}`;
-}
-
-function displayGameTimer(){
-    if(!gameEndTime) return;
-    const remaining = Math.ceil((gameEndTime - Date.now())/1000);
-    document.getElementById("game_timer").innerText = formatTime(remaining);
-    localStorage.setItem("gameTimeDisplay", formatTime(remaining));
-}
-
-function displayPenaltyTimer(){
-    if(!penaltyEndTime) return;
-    const remaining = Math.ceil((penaltyEndTime - Date.now())/1000);
-    document.getElementById("penalty_timer").innerText = formatTime(remaining);
-    localStorage.setItem("penaltyTimeDisplay", formatTime(remaining));
-}
-
-function displayRound(){ document.getElementById("round").innerText = round; saveData(); }
 function displayScores(){
     document.getElementById("scoreA").innerText = scoreA;
     document.getElementById("scoreB").innerText = scoreB;
     saveData();
 }
 
-// Game timer controls
-function startGameTimer(){
-    if(!gameRunning){
-        gameRunning = true;
-        const remaining = parseInt(localStorage.getItem("gameTimeDisplaySeconds")) || gameDuration;
-        gameEndTime = Date.now() + remaining*1000;
-        localStorage.setItem("gameEndTime", gameEndTime);
+// Initialize
+document.getElementById("game_timer").innerText = formatTime(gameDuration);
+document.getElementById("penalty_timer").innerText = formatTime(0);
+localStorage.setItem("gameTimeDisplay", formatTime(gameDuration));
+localStorage.setItem("penaltyTimeDisplay", formatTime(0));
+localStorage.setItem("gameStatus", "reset");
+localStorage.setItem("penaltyStatus", "reset");
+displayRound();
+displayScores();
+</script>
 
-        gameInterval = setInterval(()=>{
-            const rem = Math.ceil((gameEndTime - Date.now())/1000);
-            if(rem <= 0){
-                clearInterval(gameInterval);
-                gameRunning=false;
-            }
-            displayGameTimer();
-        }, 250);
-    }
-}
-
-function pauseGameTimer(){
-    if(gameRunning){
-        clearInterval(gameInterval);
-        const remaining = Math.ceil((gameEndTime - Date.now())/1000);
-        localStorage.setItem("gameTimeDisplaySeconds", remaining);
-        gameRunning=false;
-    }
-}
-
-function resetGameTimer(){
-    pauseGameTimer();
-    gameEndTime = null;
-    localStorage.removeItem("gameTimeDisplaySeconds");
-    document.getElementById("game_timer").innerText = formatTime(gameDuration);
-    localStorage.setItem("gameTimeDisplay", formatTime(gameDuration));
-}
-
-// Penalty timer controls
-function startPenaltyTimer(){
-    if(!penaltyRunning){
-        penaltyRunning = true;
-        const remaining = parseInt(localStorage.getItem("penaltyTimeDisplaySeconds")) || penaltyDuration;
-        penaltyEndTime = Date.now() + remaining*1000;
-        localStorage.setItem("penaltyEndTime", penaltyEndTime);
-
-        penaltyInterval = setInterval(()=>{
-            const rem = Math.ceil((penaltyEndTime - Date.now())/1000);
-            if(rem <= 0){
-                clearInterval(penaltyInterval);
-                penaltyRunning=false;
-            }
-            displayPenaltyTimer();
-        }, 250);
-    }
-}
-
-function pausePenaltyTimer(){
-    if(penaltyRunning){
-        clearInterval(penaltyInterval);
-        const remaining = Math.ceil((penaltyEndTime - Date.now())/1000);
-        localStorage.setItem("penaltyTimeDisplaySeconds", remaining);
-        penaltyRunning=false;
-    }
-}
-
-function resetPenaltyTimer(){
-    pausePenaltyTimer();
-    penaltyEndTime = null;
-    localStorage.removeItem("penaltyTimeDisplaySeconds");
-    document.getElementById("penalty_timer").innerText = formatTime(penaltyDuration);
-    localStorage.setItem("penaltyTimeDisplay", formatTime(penaltyDuration));
-}
-
-// Round control
-function nextRound(){ round++; displayRound(); }
-function prevRound(){ if(round>1) round--; displayRound(); }
-
-// Score control
-function changeScore(team, val){
-    if(team==='A'){ scoreA += val; if(scoreA<0) scoreA=0; }
-    else{ scoreB += val; if(scoreB<0) scoreB=0; }
-
-    if(val>0){
-        let audio = new Audio("/static/test_7/audio/score_3.mp3");
-        audio.play();
-    }
-    displayScores();
-}
-
-// Init display
-  displayGameTimer();
-  displayPenaltyTimer();
-  displayRound();
-  displayScores();
-</script> {% endcomment %}
-
-
-
-
+</body>
+</html>
 

@@ -550,36 +550,39 @@
         </div>
     </div>
 
-
 <script>
-    function updateFromStorage(){
+        function updateFromStorage(){
         // Status flags
         const gameStatus = localStorage.getItem("gameStatus") || "reset";
         const penaltyStatus = localStorage.getItem("penaltyStatus") || "reset";
 
-        // Game timer
+        // Game timer - CHANGED to 150 seconds (2:30)
         const gameEndTime = parseInt(localStorage.getItem("gameEndTime"));
         let gameRemaining = 0;
         if(gameStatus === "running" && gameEndTime){
             gameRemaining = Math.ceil((gameEndTime - Date.now())/1000);
         } else if(gameStatus === "paused"){
-            gameRemaining = parseInt(localStorage.getItem("gameTimeDisplaySeconds")) || 180;
+            gameRemaining = parseInt(localStorage.getItem("gameTimeDisplaySeconds")) || 150; // CHANGED 180 to 150
         } else if(gameStatus === "reset"){
-            gameRemaining = 180;
+            gameRemaining = 150; // CHANGED 180 to 150
         }
         document.getElementById("game_timer").innerText = formatTime(gameRemaining);
 
-        // Penalty timer
+        // Penalty timer - CHANGED to count up from 0 to 180 (3:00)
         const penaltyEndTime = parseInt(localStorage.getItem("penaltyEndTime"));
-        let penaltyRemaining = 0;
+        let penaltyElapsed = 0;
+        
         if(penaltyStatus === "running" && penaltyEndTime){
-            penaltyRemaining = Math.ceil((penaltyEndTime - Date.now())/1000);
+            const remaining = Math.ceil((penaltyEndTime - Date.now())/1000);
+            penaltyElapsed = 180 - remaining; // Count up from 0 to 180
+            penaltyElapsed = Math.max(0, penaltyElapsed);
         } else if(penaltyStatus === "paused"){
-            penaltyRemaining = parseInt(localStorage.getItem("penaltyTimeDisplaySeconds")) || 10;
+            penaltyElapsed = parseInt(localStorage.getItem("penaltyElapsedSeconds")) || 0;
         } else if(penaltyStatus === "reset"){
-            penaltyRemaining = 10;
+            penaltyElapsed = 0;
         }
-        document.getElementById("penalty_timer").innerText = formatTime(penaltyRemaining);
+        
+        document.getElementById("penalty_timer").innerText = formatTime(penaltyElapsed);
 
         // Alert for last 30s
         const gameTimerElement = document.getElementById("game_timer");
@@ -601,6 +604,12 @@
         return `${m}:${s.toString().padStart(2,'0')}`;
     }
 
+    // Redirect function - VIDEO.HTML PAGE PAR JAYEGA
+    function redirectToVideo() {
+        // Same folder mein video.html par jayega
+        window.location.href = "video.html";
+    }
+
     // Update interval (safe)
     setInterval(updateFromStorage, 250);
 
@@ -609,6 +618,11 @@
 
     // Storage listener for immediate sync
     window.addEventListener("storage", updateFromStorage);
+
+    function redirectToVideo() {
+                window.location.href = "{% url 'video' %}";
+            }
+
 </script>
 
 </body>
@@ -620,606 +634,3 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{% comment %} ------------Corrected code without logo---------------- {% endcomment %}
-
-
-{% comment %} <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drone Soccer Live Scoreboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Exo+2:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Exo 2', 'Rajdhani', sans-serif;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%),
-                linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 25%, #16213e  50%, #0f3460  75%, #533483 100%);
-            background-attachment: fixed;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                repeating-linear-gradient(
-                    90deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 255, 255, 0.03) 2px,
-                    rgba(0, 255, 255, 0.03) 4px
-                );
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .container {
-            width: 95%;
-            height: 95%;
-            max-width: 1800px;
-            max-height: 950px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 10px;
-            padding-top: 5px;
-        }
-
-        .main-title {
-            font-family: 'Orbitron', monospace;
-            font-size: 4.5vw;
-            font-weight: 900;
-            background: linear-gradient(45deg, #00ffff, #ff0080, #ffff00, #8000ff);
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: gradientShift 4s ease-in-out infinite;
-            text-shadow: 
-                0 0 10px rgba(0, 255, 255, 0.5),
-                0 0 20px rgba(255, 0, 128, 0.3),
-                0 0 30px rgba(255, 255, 0, 0.2);
-            margin-bottom: 5px;
-            letter-spacing: 2px;
-            position: relative;
-        }
-
-        .main-title::before {
-            content: 'DRONE SOCCER';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: scan 3s linear infinite;
-        }
-
-        @keyframes scan {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .subtitle {
-            color: white;
-            font-size: 1.5vw;
-            font-weight: 300;
-            opacity: 0.9;
-            margin-bottom: 10px;
-        }
-
-        .scoreboard {
-            background: 
-                linear-gradient(135deg, 
-                    rgba(255, 255, 255, 0.1) 0%, 
-                    rgba(255, 255, 255, 0.05) 50%, 
-                    rgba(0, 0, 0, 0.1) 100%);
-            backdrop-filter: blur(25px);
-            border-radius: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2),
-                0 0 40px rgba(0, 255, 255, 0.1);
-            padding: 2%;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 2;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .scoreboard::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                linear-gradient(45deg, transparent 30%, rgba(0, 255, 255, 0.03) 50%, transparent 70%);
-            border-radius: 25px;
-            animation: shimmer 4s ease-in-out infinite;
-        }
-
-        @keyframes shimmer {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
-        }
-
-        .game-info {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2%;
-            margin-bottom: 2%;
-        }
-
-        .info-card {
-            background: 
-                linear-gradient(145deg, 
-                    rgba(0, 0, 0, 0.4) 0%, 
-                    rgba(255, 255, 255, 0.05) 50%, 
-                    rgba(0, 0, 0, 0.4) 100%);
-            border-radius: 15px;
-            padding: 4%;
-            text-align: center;
-            box-shadow: 
-                0 10px 25px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transition: all 0.4s ease;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .info-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .info-card:hover::before {
-            left: 100%;
-        }
-
-        .info-card:nth-child(1) { 
-            border-top: 2px solid #ff0080;
-            box-shadow: 
-                0 10px 25px rgba(0, 0, 0, 0.3),
-                0 0 15px rgba(255, 0, 128, 0.2);
-        }
-        .info-card:nth-child(2) { 
-            border-top: 2px solid #00ffff;
-            box-shadow: 
-                0 10px 25px rgba(0, 0, 0, 0.3),
-                0 0 15px rgba(0, 255, 255, 0.2);
-        }
-        .info-card:nth-child(3) { 
-            border-top: 2px solid #ffff00;
-            box-shadow: 
-                0 10px 25px rgba(0, 0, 0, 0.3),
-                0 0 15px rgba(255, 255, 0, 0.2);
-        }
-
-        .info-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .info-label {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.1vw;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.8);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10%;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-        }
-
-        .info-value {
-            font-family: 'Orbitron', monospace;
-            font-size: 2.8vw;
-            font-weight: 900;
-            color: #ffffff;
-            text-shadow: 
-                0 0 8px rgba(255, 255, 255, 0.5),
-                0 0 15px rgba(0, 255, 255, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-
-        .teams-section {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 2%;
-            align-items: center;
-            margin-bottom: 2%;
-            flex-grow: 1;
-        }
-
-        .team-card {
-            background: 
-                linear-gradient(145deg, 
-                    rgba(0, 0, 0, 0.6) 0%, 
-                    rgba(255, 255, 255, 0.03) 50%, 
-                    rgba(0, 0, 0, 0.6) 100%);
-            border-radius: 20px;
-            padding: 4%;
-            text-align: center;
-            box-shadow: 
-                0 15px 30px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transition: all 0.4s ease;
-            border: 1px solid;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            height: 100%;
-        }
-
-        .team-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: 
-                radial-gradient(circle, 
-                    rgba(255, 255, 255, 0.05) 0%, 
-                    transparent 70%);
-            animation: rotate 8s linear infinite;
-        }
-
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .team-a { 
-            border-color: #ff0080;
-            box-shadow: 
-                0 15px 30px rgba(0, 0, 0, 0.4),
-                0 0 20px rgba(255, 0, 128, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-        .team-b { 
-            border-color: #00ffff;
-            box-shadow: 
-                0 15px 30px rgba(0, 0, 0, 0.4),
-                0 0 20px rgba(0, 255, 255, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .team-card:hover {
-            transform: scale(1.01);
-            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .team-name {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.8vw;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 8%;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
-            position: relative;
-            z-index: 1;
-        }
-
-        .team-score {
-            font-family: 'Orbitron', monospace;
-            font-size: 5vw;
-            font-weight: 900;
-            margin-bottom: 4%;
-            position: relative;
-            z-index: 1;
-            text-shadow: 
-                0 0 0px currentColor,
-                0 0 0px currentColor,
-                0 0px 0px rgba(0, 0, 0, 0.5);
-        }
-
-        .team-a .team-score { 
-            color: #ff000dff;
-        }
-        .team-b .team-score { 
-            color: #15cdaecc;
-        }
-
-        .vs-divider {
-            font-family: 'Orbitron', monospace;
-            font-size: 3.5vw;
-            font-weight: 900;
-            color: #ffffff;
-            text-shadow: 
-                0 0 15px #ff0080,
-                0 0 30px #00ffff,
-                0 0 45px #ffff00,
-                0 4px 8px rgba(0, 0, 0, 0.8);
-            position: relative;
-            animation: vsGlow 2s ease-in-out infinite alternate;
-            letter-spacing: 3px;
-        }
-
-        .vs-divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: -30px;
-            right: -30px;
-            height: 2px;
-            background: linear-gradient(90deg, 
-                transparent, 
-                #ff0080, 
-                #00ffff, 
-                #ffff00, 
-                #ff0080, 
-                transparent);
-            transform: translateY(-50%);
-            animation: lineGlow 3s linear infinite;
-        }
-
-        .vs-divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: -30px;
-            right: -30px;
-            height: 2px;
-            background: linear-gradient(90deg, 
-                transparent, 
-                #00ffff, 
-                #ff0080, 
-                #ffff00, 
-                #00ffff, 
-                transparent);
-            transform: translateY(-50%);
-            animation: lineGlow 3s linear infinite reverse;
-        }
-
-        @keyframes vsGlow {
-            0% { 
-                text-shadow: 
-                    0 0 15px #ff0080,
-                    0 0 30px #00ffff,
-                    0 0 45px #ffff00,
-                    0 4px 8px rgba(0, 0, 0, 0.8);
-            }
-            100% { 
-                text-shadow: 
-                    0 0 25px #ff0080,
-                    0 0 50px #00ffff,
-                    0 0 75px #ffff00,
-                    0 4px 8px rgba(0, 0, 0, 0.8);
-            }
-        }
-
-        @keyframes lineGlow {
-            0% { opacity: 0.3; }
-            50% { opacity: 1; }
-            100% { opacity: 0.3; }
-        }
-
-        .copyright {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 0.9vw;
-            font-weight: 400;
-            padding: 10px;
-            background: 
-                linear-gradient(135deg, 
-                    rgba(0, 0, 0, 0.4) 0%, 
-                    rgba(255, 255, 255, 0.02) 50%, 
-                    rgba(0, 0, 0, 0.4) 100%);
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            letter-spacing: 1px;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
-            position: relative;
-            z-index: 2;
-        }
-
-        /* Redirect button style */
-        .redirect-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: 1px solid white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-        .redirect-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        /* Animation for score updates */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-            100% { transform: scale(1); }
-        }
-        
-        .pulse {
-            animation: pulse 0.5s;
-        }
-    </style>
-</head>
-<body>
-    <!-- Redirect button -->
-    <button class="redirect-btn" onclick="redirectToVideo()">Go to Video</button>
-    
-    <div class="container">
-        <div class="header">
-            <h1 class="main-title">DRONE SOCCER</h1>
-        </div>
-
-        <div class="scoreboard">
-            <div class="game-info">
-                <div class="info-card">
-                    <div class="info-label">Game Timer</div>
-                    <div class="info-value" id="game_timer">3:00</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-label">Round</div>
-                    <div class="info-value" id="round">1</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-label">Penalty Timer</div>
-                    <div class="info-value" id="penalty_timer">0:10</div>
-                </div>
-            </div>
-
-            <div class="teams-section">
-                <div class="team-card team-a">
-                    <div class="team-name" id="teamAName">TEAM A</div>
-                    <div class="team-score" id="scoreA">0</div>
-                </div>
-                
-                <div class="vs-divider">VS</div>
-                
-                <div class="team-card team-b">
-                    <div class="team-name" id="teamBName">TEAM B</div>
-                    <div class="team-score" id="scoreB">0</div>
-                </div>
-            </div>
-        </div>
-        <div class="copyright">
-            <p>&copy; 2025 All rights reserved. Powered by DroneNova pvt ltd</p>
-        </div>
-    </div>
-
-    <script>
-    function updateFromStorage(){
-        // Status flags
-        const gameStatus = localStorage.getItem("gameStatus") || "reset";
-        const penaltyStatus = localStorage.getItem("penaltyStatus") || "reset";
-
-        // Game timer
-        const gameEndTime = parseInt(localStorage.getItem("gameEndTime"));
-        let gameRemaining = 0;
-        if(gameStatus === "running" && gameEndTime){
-            gameRemaining = Math.ceil((gameEndTime - Date.now())/1000);
-        } else if(gameStatus === "paused"){
-            gameRemaining = parseInt(localStorage.getItem("gameTimeDisplaySeconds")) || 180;
-        } else if(gameStatus === "reset"){
-            gameRemaining = 180;
-        }
-        document.getElementById("game_timer").innerText = formatTime(gameRemaining);
-
-        // Penalty timer
-        const penaltyEndTime = parseInt(localStorage.getItem("penaltyEndTime"));
-        let penaltyRemaining = 0;
-        if(penaltyStatus === "running" && penaltyEndTime){
-            penaltyRemaining = Math.ceil((penaltyEndTime - Date.now())/1000);
-        } else if(penaltyStatus === "paused"){
-            penaltyRemaining = parseInt(localStorage.getItem("penaltyTimeDisplaySeconds")) || 10;
-        } else if(penaltyStatus === "reset"){
-            penaltyRemaining = 10;
-        }
-        document.getElementById("penalty_timer").innerText = formatTime(penaltyRemaining);
-
-        // Alert for last 30s
-        const gameTimerElement = document.getElementById("game_timer");
-        if(gameRemaining <= 30) gameTimerElement.classList.add("timer-alert");
-        else gameTimerElement.classList.remove("timer-alert");
-
-        // Scores, round, teams
-        document.getElementById("round").innerText = localStorage.getItem("round") || 1;
-        document.getElementById("teamAName").innerText = localStorage.getItem("teamAName") || "Team A";
-        document.getElementById("teamBName").innerText = localStorage.getItem("teamBName") || "Team B";
-        document.getElementById("scoreA").innerText = localStorage.getItem("scoreA") || 0;
-        document.getElementById("scoreB").innerText = localStorage.getItem("scoreB") || 0;
-    }
-
-    // Format helper
-    function formatTime(sec){
-        sec = Math.max(0, sec);
-        const m = Math.floor(sec/60), s = sec%60;
-        return `${m}:${s.toString().padStart(2,'0')}`;
-    }
-
-    // Update interval (safe)
-    setInterval(updateFromStorage, 250);
-
-    // Initial load
-    updateFromStorage();
-
-    // Storage listener for immediate sync
-    window.addEventListener("storage", updateFromStorage);
-</script>
-
-</body>
-</html> {% endcomment %}
