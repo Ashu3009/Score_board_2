@@ -1,3 +1,6 @@
+
+{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -73,6 +76,7 @@
       margin: 15px 0;
       background: linear-gradient(to bottom, #FFFFFF, #FFD700);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
       line-height: 1.2;
       animation: winnerGlow 2s infinite alternate;
@@ -208,34 +212,35 @@
     
     /* Logo button */
     .logo-btn {
-      position: absolute;
-      top: 40px;
-      left: 40px;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.15);
-      border: 2px solid #FFD700;
-      cursor: pointer;
-      padding: 20px;
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: bold;
-      color: white;
-      font-size: 1.5em;
-      backdrop-filter: blur(5px);
-    }
+            position: fixed;
+            top: 10px;
+            left: 33px;
+            z-index: 1000;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
     
     .logo-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
-      background: rgba(255, 215, 0, 0.2);
-    }
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+      }
     
+    .logo-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+    }
+
+
     /* Trophy icon */
     .trophy {
       font-size: 3em;
@@ -465,6 +470,10 @@
   </style>
 </head>
 <body>
+
+   <!-- Logo button (redirect) -->
+
+
   <!-- Scan lines for video effect -->
   <div class="scan-lines"></div>
   
@@ -525,8 +534,10 @@
     </div>
   </div>
 
-  <!-- Logo button -->
-  <button class="logo-btn" onclick="redirectToViewer()">VIEWER</button>
+  <!-- Logo button (redirect) -->
+    <button class="logo-btn" onclick="redirectToViewer()">
+        <img src="{% static 'test_7/photos/circular-logo.png' %}" alt="DroneNova Logo">
+    </button>
 
   <script>
     // Create background particles
