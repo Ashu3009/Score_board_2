@@ -73,7 +73,6 @@
       margin: 15px 0;
       background: linear-gradient(to bottom, #FFFFFF, #FFD700);
       -webkit-background-clip: text;
-      background-clip: text;
       -webkit-text-fill-color: transparent;
       line-height: 1.2;
       animation: winnerGlow 2s infinite alternate;
@@ -458,6 +457,11 @@
         padding: 10px;
       }
     }
+    
+    /* Hidden class */
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
@@ -568,8 +572,13 @@
       ];
       
       rounds.forEach(round => {
-        const scoreA = parseInt(document.getElementById(round.scoreA).innerText) || 0;
-        const scoreB = parseInt(document.getElementById(round.scoreB).innerText) || 0;
+        const scoreAEl = document.getElementById(round.scoreA);
+        const scoreBEl = document.getElementById(round.scoreB);
+        
+        if (!scoreAEl || !scoreBEl) return;
+        
+        const scoreA = parseInt(scoreAEl.innerText) || 0;
+        const scoreB = parseInt(scoreBEl.innerText) || 0;
         
         // Remove winner class from both
         document.getElementById(round.a).classList.remove('winner');
@@ -584,40 +593,42 @@
       });
     }
     
-    // Update display with data (Using in-memory storage instead of localStorage)
-    let gameData = {
-      winnerName: "TEAM ALPHA",
-      teamAName: "TEAM ALPHA",
-      teamBName: "TEAM BETA",
-      round1ScoreA: "85",
-      round1ScoreB: "70",
-      round2ScoreA: "92",
-      round2ScoreB: "88",
-      round3ScoreA: "78",
-      round3ScoreB: "95"
-    };
-    
+    // Update display with data from localStorage (set by admin)
     function updateDisplay() {
-      // Get winner name
-      document.getElementById("winnerName").innerText = gameData.winnerName;
+      // Get winner name from localStorage
+      const winnerName = localStorage.getItem("winnerName") || "TEAM ALPHA";
+      document.getElementById("winnerName").innerText = winnerName;
+      
+      // Get team names from localStorage
+      const teamAName = localStorage.getItem("teamAName") || "TEAM ALPHA";
+      const teamBName = localStorage.getItem("teamBName") || "TEAM BETA";
       
       // Update Round 1
-      document.getElementById("teamA1").innerText = gameData.teamAName;
-      document.getElementById("teamB1").innerText = gameData.teamBName;
-      document.getElementById("scoreA1").innerText = gameData.round1ScoreA;
-      document.getElementById("scoreB1").innerText = gameData.round1ScoreB;
+      document.getElementById("teamA1").innerText = teamAName;
+      document.getElementById("teamB1").innerText = teamBName;
+      document.getElementById("scoreA1").innerText = localStorage.getItem("round1ScoreA") || "0";
+      document.getElementById("scoreB1").innerText = localStorage.getItem("round1ScoreB") || "0";
       
       // Update Round 2
-      document.getElementById("teamA2").innerText = gameData.teamAName;
-      document.getElementById("teamB2").innerText = gameData.teamBName;
-      document.getElementById("scoreA2").innerText = gameData.round2ScoreA;
-      document.getElementById("scoreB2").innerText = gameData.round2ScoreB;
+      document.getElementById("teamA2").innerText = teamAName;
+      document.getElementById("teamB2").innerText = teamBName;
+      document.getElementById("scoreA2").innerText = localStorage.getItem("round2ScoreA") || "0";
+      document.getElementById("scoreB2").innerText = localStorage.getItem("round2ScoreB") || "0";
       
       // Update Round 3
-      document.getElementById("teamA3").innerText = gameData.teamAName;
-      document.getElementById("teamB3").innerText = gameData.teamBName;
-      document.getElementById("scoreA3").innerText = gameData.round3ScoreA;
-      document.getElementById("scoreB3").innerText = gameData.round3ScoreB;
+      document.getElementById("teamA3").innerText = teamAName;
+      document.getElementById("teamB3").innerText = teamBName;
+      document.getElementById("scoreA3").innerText = localStorage.getItem("round3ScoreA") || "0";
+      document.getElementById("scoreB3").innerText = localStorage.getItem("round3ScoreB") || "0";
+      
+      // Show/Hide Round 3 based on localStorage setting
+      const showRound3 = localStorage.getItem("showRound3");
+      const round3Container = document.getElementById("round3Container");
+      if (showRound3 === "false") {
+        round3Container.classList.add("hidden");
+      } else {
+        round3Container.classList.remove("hidden");
+      }
       
       // Highlight winning teams
       highlightWinningTeams();
@@ -633,7 +644,7 @@
       setInterval(createConfetti, 5000);
     });
     
-    // Update display every 500ms
+    // Update display every 500ms to catch any changes from admin
     setInterval(updateDisplay, 500);
 
     function redirectToViewer() {
