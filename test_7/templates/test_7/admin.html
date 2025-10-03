@@ -3,43 +3,188 @@
 <head>
   <meta charset="UTF-8">
   <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 15px;
+      margin: 0;
+      font-size: 14px;
+    }
+    
+    h1 {
+      font-size: 1.5em;
+      margin: 10px 0;
+    }
+    
+    h2 {
+      font-size: 1.2em;
+      margin: 10px 0 5px 0;
+    }
+    
+    h3 {
+      font-size: 1.1em;
+      margin: 10px 0 5px 0;
+    }
+    
+    button {
+      padding: 8px 15px;
+      margin: 3px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    
+    input[type="text"], input[type="number"] {
+      padding: 6px;
+      margin: 3px;
+      font-size: 13px;
+    }
+    
+    .winner-section {
+      background: #f0f0f0;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    
+    .score-input {
+      width: 60px;
+      padding: 5px;
+      margin: 0 5px;
+    }
+    
+    .round-inputs {
+      margin: 8px 0;
+      padding: 8px;
+      background: white;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      display: inline-block;
+      width: 30%;
+      vertical-align: top;
+    }
+    
+    .round-inputs h4 {
+      margin: 0 0 8px 0;
+      font-size: 1em;
+    }
+    
+    .section-group {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .section-item {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    hr {
+      margin: 15px 0;
+      border: none;
+      border-top: 1px solid #ccc;
+    }
+  </style>
 </head>
 <body>
-  <h1>Admin Control</h1>
+  <h1>Admin Control Panel</h1>
 
-  <!-- Game Timer -->
-  <h2>Game Timer: <span id="game_timer">2:30</span></h2>
-  <button onclick="startGameTimer()">Start</button>
-  <button onclick="pauseGameTimer()">Pause</button>
-  <button onclick="resetGameTimer()">Reset</button>
+  <div class="section-group">
+    <!-- Game Timer -->
+    <div class="section-item">
+      <h2>Game Timer: <span id="game_timer">2:30</span></h2>
+      <button onclick="startGameTimer()">Start</button>
+      <button onclick="pauseGameTimer()">Pause</button>
+      <button onclick="resetGameTimer()">Reset</button>
+    </div>
 
-  <!-- Penalty Timer -->
-  <h2>Penalty Timer: <span id="penalty_timer">0:00</span></h2>
-  <button onclick="startPenaltyTimer()">Start</button>
-  <button onclick="pausePenaltyTimer()">Pause</button>
-  <button onclick="resetPenaltyTimer()">Reset</button>
+    <!-- Penalty Timer -->
+    <div class="section-item">
+      <h2>Penalty Timer: <span id="penalty_timer">0:00</span></h2>
+      <button onclick="startPenaltyTimer()">Start</button>
+      <button onclick="pausePenaltyTimer()">Pause</button>
+      <button onclick="resetPenaltyTimer()">Reset</button>
+    </div>
 
-  <!-- Round -->
-  <h2>Round: <span id="round">1</span></h2>
-  <button onclick="prevRound()">Previous</button>
-  <button onclick="nextRound()">Next</button>
-
-  <!-- Team Names -->
-  <h2>Teams</h2>
-  <input type="text" id="teamAName" value="Team A" onchange="saveData()">
-  <input type="text" id="teamBName" value="Team B" onchange="saveData()">
-
-  <!-- Scores -->
-  <h3>Scores</h3>
-  <div>
-    <span id="scoreA">0</span>
-    <button onclick="changeScore('A',1)">+A</button>
-    <button onclick="changeScore('A',-1)">-A</button>
+    <!-- Round -->
+    <div class="section-item">
+      <h2>Round: <span id="round">1</span></h2>
+      <button onclick="prevRound()">Previous</button>
+      <button onclick="nextRound()">Next</button>
+    </div>
   </div>
-  <div>
-    <span id="scoreB">0</span>
-    <button onclick="changeScore('B',1)">+B</button>
-    <button onclick="changeScore('B',-1)">-B</button>
+
+  <hr>
+
+  <div class="section-group">
+    <!-- Team Names -->
+    <div class="section-item">
+      <h3>Team Names</h3>
+      <input type="text" id="teamAName" value="Team A" onchange="saveData()">
+      <input type="text" id="teamBName" value="Team B" onchange="saveData()">
+    </div>
+
+    <!-- Scores -->
+    <div class="section-item">
+      <h3>Current Scores</h3>
+      <div>
+        Team A: <span id="scoreA">0</span>
+        <button onclick="changeScore('A',1)">+</button>
+        <button onclick="changeScore('A',-1)">-</button>
+      </div>
+      <div>
+        Team B: <span id="scoreB">0</span>
+        <button onclick="changeScore('B',1)">+</button>
+        <button onclick="changeScore('B',-1)">-</button>
+      </div>
+    </div>
+
+    <!-- Display Control -->
+    <div class="section-item">
+      <h3>Display Control</h3>
+      <button onclick="switchToViewer()" style="background-color: #4CAF50; color: white;">Viewer</button>
+      <button onclick="switchToWinner()" style="background-color: #FFD700; color: black;">Winner</button>
+      <button onclick="switchToVideo()" style="background-color: #2196F3; color: white;">Video</button>
+      <p>Current: <strong><span id="currentDisplay">viewer</span></strong></p>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- Winner Section -->
+  <div class="winner-section">
+    <h3>Winner Page Controls</h3>
+    
+    <!-- Round Scores -->
+    <div class="round-inputs">
+      <h4>Round 1</h4>
+      <div>A: <input type="number" id="r1ScoreA" class="score-input" value="0" min="0"></div>
+      <div>B: <input type="number" id="r1ScoreB" class="score-input" value="0" min="0"></div>
+      <button onclick="saveManualRoundScore(1)">Save</button>
+    </div>
+    
+    <div class="round-inputs">
+      <h4>Round 2</h4>
+      <div>A: <input type="number" id="r2ScoreA" class="score-input" value="0" min="0"></div>
+      <div>B: <input type="number" id="r2ScoreB" class="score-input" value="0" min="0"></div>
+      <button onclick="saveManualRoundScore(2)">Save</button>
+    </div>
+    
+    <div class="round-inputs">
+      <h4>Round 3</h4>
+      <div>A: <input type="number" id="r3ScoreA" class="score-input" value="0" min="0"></div>
+      <div>B: <input type="number" id="r3ScoreB" class="score-input" value="0" min="0"></div>
+      <button onclick="saveManualRoundScore(3)">Save</button>
+    </div>
+    
+    <div style="margin-top: 10px;">
+      <button onclick="toggleRound3(true)">Show Round 3</button>
+      <button onclick="toggleRound3(false)">Hide Round 3</button>
+      <button onclick="setWinner('A')" style="background-color: #4CAF50; color: white;">Set Team A Winner</button>
+      <button onclick="setWinner('B')" style="background-color: #4CAF50; color: white;">Set Team B Winner</button>
+      <button onclick="clearWinnerData()" style="background-color: #ff4444; color: white;">Clear All</button>
+    </div>
   </div>
 
 <script>
@@ -124,14 +269,12 @@ function resetGameTimer(){
     displayScores();
 }
 
-
 // Penalty timer controls (COUNT UP from 0 to 3:00)
 function startPenaltyTimer(){
     if(!penaltyRunning){
         penaltyRunning = true;
         localStorage.setItem("penaltyStatus","running");
         
-        // Get elapsed time if paused, otherwise start from 0
         const elapsed = parseInt(localStorage.getItem("penaltyElapsedSeconds")) || 0;
         penaltyEndTime = Date.now() + (penaltyDuration - elapsed) * 1000;
         localStorage.setItem("penaltyEndTime", penaltyEndTime);
@@ -153,11 +296,8 @@ function startPenaltyTimer(){
     }
 }
 
-// Initialize - Penalty timer starts at 0:00
 document.getElementById("penalty_timer").innerText = formatTime(0);
 localStorage.setItem("penaltyTimeDisplay", formatTime(0));
-
-
 
 function pausePenaltyTimer(){
     if(penaltyRunning){
@@ -213,6 +353,101 @@ function displayScores(){
     saveData();
 }
 
+// Display Control Functions
+function switchToViewer() {
+    localStorage.setItem("currentDisplay", "viewer");
+    document.getElementById("currentDisplay").innerText = "viewer";
+    
+    const viewerWindow = window.open('', 'ViewerWindow');
+    if (viewerWindow && !viewerWindow.closed) {
+        viewerWindow.location.reload();
+    } else {
+        window.open('/viewer/', 'ViewerWindow', 'width=1920,height=1080');
+    }
+    alert('Switched to Viewer');
+}
+
+function switchToWinner() {
+    localStorage.setItem("currentDisplay", "winner");
+    document.getElementById("currentDisplay").innerText = "winner";
+    
+    const viewerWindow = window.open('', 'ViewerWindow');
+    if (viewerWindow && !viewerWindow.closed) {
+        viewerWindow.postMessage({action: 'showWinner'}, '*');
+    }
+    alert('Switched to Winner');
+}
+
+function switchToVideo() {
+    localStorage.setItem("currentDisplay", "video");
+    document.getElementById("currentDisplay").innerText = "video";
+    
+    const viewerWindow = window.open('', 'ViewerWindow');
+    if (viewerWindow && !viewerWindow.closed) {
+        viewerWindow.postMessage({action: 'showVideo'}, '*');
+    }
+    alert('Switched to Video');
+}
+
+function loadCurrentDisplay() {
+    const currentDisplay = localStorage.getItem("currentDisplay") || "viewer";
+    document.getElementById("currentDisplay").innerText = currentDisplay;
+}
+
+// Winner Page Functions
+function saveManualRoundScore(roundNum) {
+    const scoreA = parseInt(document.getElementById(`r${roundNum}ScoreA`).value) || 0;
+    const scoreB = parseInt(document.getElementById(`r${roundNum}ScoreB`).value) || 0;
+    
+    localStorage.setItem(`round${roundNum}ScoreA`, scoreA);
+    localStorage.setItem(`round${roundNum}ScoreB`, scoreB);
+    alert(`Round ${roundNum} saved: A=${scoreA}, B=${scoreB}`);
+}
+
+function toggleRound3(show) {
+    localStorage.setItem("showRound3", show.toString());
+    alert(`Round 3 ${show ? 'shown' : 'hidden'}`);
+}
+
+function setWinner(team) {
+    const teamName = team === 'A' 
+        ? document.getElementById("teamAName").value 
+        : document.getElementById("teamBName").value;
+    localStorage.setItem("winnerName", teamName);
+    alert(`Winner: ${teamName}`);
+}
+
+function clearWinnerData() {
+    if(confirm("Clear all winner data?")) {
+        localStorage.removeItem("winnerName");
+        localStorage.removeItem("round1ScoreA");
+        localStorage.removeItem("round1ScoreB");
+        localStorage.removeItem("round2ScoreA");
+        localStorage.removeItem("round2ScoreB");
+        localStorage.removeItem("round3ScoreA");
+        localStorage.removeItem("round3ScoreB");
+        localStorage.removeItem("showRound3");
+        
+        document.getElementById("r1ScoreA").value = 0;
+        document.getElementById("r1ScoreB").value = 0;
+        document.getElementById("r2ScoreA").value = 0;
+        document.getElementById("r2ScoreB").value = 0;
+        document.getElementById("r3ScoreA").value = 0;
+        document.getElementById("r3ScoreB").value = 0;
+        
+        alert("All cleared!");
+    }
+}
+
+function loadSavedScores() {
+    document.getElementById("r1ScoreA").value = localStorage.getItem("round1ScoreA") || 0;
+    document.getElementById("r1ScoreB").value = localStorage.getItem("round1ScoreB") || 0;
+    document.getElementById("r2ScoreA").value = localStorage.getItem("round2ScoreA") || 0;
+    document.getElementById("r2ScoreB").value = localStorage.getItem("round2ScoreB") || 0;
+    document.getElementById("r3ScoreA").value = localStorage.getItem("round3ScoreA") || 0;
+    document.getElementById("r3ScoreB").value = localStorage.getItem("round3ScoreB") || 0;
+}
+
 // Initialize
 document.getElementById("game_timer").innerText = formatTime(gameDuration);
 document.getElementById("penalty_timer").innerText = formatTime(0);
@@ -222,8 +457,9 @@ localStorage.setItem("gameStatus", "reset");
 localStorage.setItem("penaltyStatus", "reset");
 displayRound();
 displayScores();
+loadCurrentDisplay();
+loadSavedScores();
 </script>
 
 </body>
 </html>
-

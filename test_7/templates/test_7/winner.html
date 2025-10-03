@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Winner Display</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Arial Black', 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: white;
+      overflow: auto;
+      position: relative;
+    }
+    
+    .container {
+      text-align: center;
+      padding: 20px;
+      width: 100%;
+      max-width: 1920px;
+      height: 100vh;
+      max-height: 1080px;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      overflow: hidden;
+    }
+    
+    /* WINNER SECTION - Video Game Style */
+    .winner-section {
+      margin-top: 0;
+      position: relative;
+      z-index: 10;
+      flex: 0 0 35%;
+    }
+    
+    .winner-title {
+      font-size: 3.5em;
+      margin-bottom: 15px;
+      text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+      letter-spacing: 8px;
+      font-weight: 900;
+      color: #FFD700;
+      text-transform: uppercase;
+      animation: titlePulse 3s infinite;
+    }
+    
+    @keyframes titlePulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    
+    .winner-name {
+      font-size: 4em;
+      font-weight: 900;
+      text-shadow: 
+        0 0 20px #FFD700,
+        0 0 40px #FFA500,
+        0 0 60px #FF8C00,
+        4px 4px 0px rgba(0, 0, 0, 0.8);
+      color: #FFFFFF;
+      margin: 15px 0;
+      background: linear-gradient(to bottom, #FFFFFF, #FFD700);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+      animation: winnerGlow 2s infinite alternate;
+      position: relative;
+      display: inline-block;
+      padding: 0 20px;
+    }
+    
+    @keyframes winnerGlow {
+      from {
+        text-shadow: 
+          0 0 20px #FFD700,
+          0 0 40px #FFA500,
+          4px 4px 0px rgba(0, 0, 0, 0.8);
+      }
+      to {
+        text-shadow: 
+          0 0 30px #FFD700,
+          0 0 60px #FFA500,
+          0 0 80px #FF8C00,
+          4px 4px 0px rgba(0, 0, 0, 0.8);
+      }
+    }
+    
+    /* SCORES SECTION - Video Game Dashboard Style */
+    .scores-section {
+      margin-bottom: 0;
+      position: relative;
+      z-index: 10;
+      flex: 0 0 60%;
+      max-width: 1000px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .scores-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      gap: 15px;
+    }
+    
+    .round-score {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px 20px;
+      border-radius: 15px;
+      border: 3px solid #FFD700;
+      box-shadow: 
+        0 0 30px rgba(255, 215, 0, 0.5),
+        inset 0 0 20px rgba(255, 215, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .round-score::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(to right, transparent, #FFD700, transparent);
+    }
+    
+    .round-label {
+      font-size: 1.8em;
+      margin-bottom: 15px;
+      font-weight: 700;
+      color: #FFD700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    }
+    
+    .team-scores {
+      font-size: 1.6em;
+      font-weight: bold;
+    }
+    
+    .team-score-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 8px 0;
+      padding: 10px 15px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .team-score-row::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transform: translateX(-100%);
+    }
+    
+    .team-score-row.winner:hover::before {
+      animation: shine 1.5s;
+    }
+    
+    @keyframes shine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    .team-score-row.winner {
+      background: rgba(255, 215, 0, 0.2);
+      border: 2px solid #FFD700;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      transform: scale(1.05);
+    }
+    
+    .team-name {
+      font-size: 0.9em;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .team-score {
+      font-weight: 800;
+      color: #FFD700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    }
+    
+    /* Logo button */
+    .logo-btn {
+      position: absolute;
+      top: 40px;
+      left: 40px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid #FFD700;
+      cursor: pointer;
+      padding: 20px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      color: white;
+      font-size: 1.5em;
+      backdrop-filter: blur(5px);
+    }
+    
+    .logo-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+      background: rgba(255, 215, 0, 0.2);
+    }
+    
+    /* Trophy icon */
+    .trophy {
+      font-size: 3em;
+      margin-bottom: 15px;
+      animation: bounce 2s infinite;
+      filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-20px) rotate(5deg); }
+      75% { transform: translateY(-10px) rotate(-5deg); }
+    }
+    
+    /* Confetti effect */
+    .confetti {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background: #FFD700;
+      top: 0;
+      opacity: 0;
+      z-index: 1;
+    }
+    
+    @keyframes confetti-fall {
+      0% { top: -10px; opacity: 1; transform: rotate(0deg); }
+      100% { top: 100vh; opacity: 0; transform: rotate(360deg); }
+    }
+    
+    /* Scan lines effect for video game look */
+    .scan-lines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(0, 0, 0, 0.1) 50%
+      );
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    
+    /* Glowing particles in background */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #FFD700;
+      border-radius: 50%;
+      animation: particleFloat 10s infinite linear;
+      opacity: 0;
+    }
+    
+    @keyframes particleFloat {
+      0% {
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) translateX(100px);
+        opacity: 0;
+      }
+    }
+    
+    /* Responsive Design */
+    @media screen and (max-width: 1400px) {
+      .winner-title {
+        font-size: 3em;
+      }
+      
+      .winner-name {
+        font-size: 4em;
+      }
+      
+      .trophy {
+        font-size: 3em;
+      }
+      
+      .round-label {
+        font-size: 1.5em;
+      }
+      
+      .team-scores {
+        font-size: 1.4em;
+      }
+    }
+    
+    @media screen and (max-width: 1024px) {
+      .container {
+        flex-direction: column;
+        padding: 20px;
+        gap: 30px;
+      }
+      
+      .winner-section {
+        flex: unset;
+        width: 100%;
+      }
+      
+      .scores-section {
+        flex: unset;
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      .winner-title {
+        font-size: 2.5em;
+      }
+      
+      .winner-name {
+        font-size: 3em;
+      }
+      
+      .trophy {
+        font-size: 2.5em;
+      }
+    }
+    
+    @media screen and (max-width: 768px) {
+      .winner-title {
+        font-size: 2em;
+        margin-bottom: 15px;
+      }
+      
+      .winner-name {
+        font-size: 2.5em;
+        padding: 0 10px;
+      }
+      
+      .trophy {
+        font-size: 2em;
+        margin-bottom: 15px;
+      }
+      
+      .round-label {
+        font-size: 1.3em;
+        margin-bottom: 10px;
+      }
+      
+      .team-scores {
+        font-size: 1.2em;
+      }
+      
+      .round-score {
+        padding: 15px 10px;
+      }
+      
+      .team-score-row {
+        padding: 10px;
+        margin: 8px 0;
+      }
+      
+      .logo-btn {
+        width: 80px;
+        height: 80px;
+        font-size: 1em;
+        top: 20px;
+        left: 20px;
+      }
+    }
+    
+    @media screen and (max-width: 480px) {
+      .container {
+        padding: 15px;
+        gap: 20px;
+      }
+      
+      .winner-title {
+        font-size: 1.5em;
+        letter-spacing: 4px;
+      }
+      
+      .winner-name {
+        font-size: 2em;
+      }
+      
+      .trophy {
+        font-size: 1.8em;
+      }
+      
+      .round-label {
+        font-size: 1.1em;
+        letter-spacing: 2px;
+      }
+      
+      .team-scores {
+        font-size: 1em;
+      }
+      
+      .scores-container {
+        gap: 15px;
+      }
+      
+      .logo-btn {
+        width: 60px;
+        height: 60px;
+        font-size: 0.8em;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Scan lines for video effect -->
+  <div class="scan-lines"></div>
+  
+  <!-- Background particles -->
+  <div class="particles" id="particles"></div>
+  
+  <div class="container">
+    <div class="winner-section">
+      <div class="trophy">🏆</div>
+      <div class="winner-title">CHAMPION</div>
+      <div class="winner-name" id="winnerName">TEAM ALPHA</div>
+    </div>
+    
+    <div class="scores-section">
+      <div class="scores-container" id="scoresContainer">
+        <div class="round-score">
+          <div class="round-label">Round 1</div>
+          <div class="team-scores">
+            <div class="team-score-row" id="round1TeamA">
+              <span class="team-name" id="teamA1">TEAM ALPHA</span>
+              <span class="team-score" id="scoreA1">85</span>
+            </div>
+            <div class="team-score-row" id="round1TeamB">
+              <span class="team-name" id="teamB1">TEAM BETA</span>
+              <span class="team-score" id="scoreB1">70</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="round-score">
+          <div class="round-label">Round 2</div>
+          <div class="team-scores">
+            <div class="team-score-row" id="round2TeamA">
+              <span class="team-name" id="teamA2">TEAM ALPHA</span>
+              <span class="team-score" id="scoreA2">92</span>
+            </div>
+            <div class="team-score-row" id="round2TeamB">
+              <span class="team-name" id="teamB2">TEAM BETA</span>
+              <span class="team-score" id="scoreB2">88</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="round-score" id="round3Container">
+          <div class="round-label">Round 3</div>
+          <div class="team-scores">
+            <div class="team-score-row" id="round3TeamA">
+              <span class="team-name" id="teamA3">TEAM ALPHA</span>
+              <span class="team-score" id="scoreA3">78</span>
+            </div>
+            <div class="team-score-row" id="round3TeamB">
+              <span class="team-name" id="teamB3">TEAM BETA</span>
+              <span class="team-score" id="scoreB3">95</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logo button -->
+  <button class="logo-btn" onclick="redirectToViewer()">VIEWER</button>
+
+  <script>
+    // Create background particles
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      for (let i = 0; i < 50; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + 'vw';
+        particle.style.animationDelay = Math.random() * 10 + 's';
+        particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // Create confetti effect
+    function createConfetti() {
+      const colors = ['#FFD700', '#FFA500', '#4ECDC4', '#45B7D1', '#FF6B6B', '#FF9FF3'];
+      
+      for (let i = 0; i < 150; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.width = Math.random() * 12 + 8 + 'px';
+        confetti.style.height = Math.random() * 12 + 8 + 'px';
+        confetti.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear forwards`;
+        document.body.appendChild(confetti);
+        
+        // Remove confetti after animation completes
+        setTimeout(() => {
+          confetti.remove();
+        }, 5000);
+      }
+    }
+    
+    // Highlight winning teams in each round
+    function highlightWinningTeams() {
+      const rounds = [
+        { a: 'round1TeamA', b: 'round1TeamB', scoreA: 'scoreA1', scoreB: 'scoreB1' },
+        { a: 'round2TeamA', b: 'round2TeamB', scoreA: 'scoreA2', scoreB: 'scoreB2' },
+        { a: 'round3TeamA', b: 'round3TeamB', scoreA: 'scoreA3', scoreB: 'scoreB3' }
+      ];
+      
+      rounds.forEach(round => {
+        const scoreA = parseInt(document.getElementById(round.scoreA).innerText) || 0;
+        const scoreB = parseInt(document.getElementById(round.scoreB).innerText) || 0;
+        
+        // Remove winner class from both
+        document.getElementById(round.a).classList.remove('winner');
+        document.getElementById(round.b).classList.remove('winner');
+        
+        // Add winner class to the team with higher score
+        if (scoreA > scoreB) {
+          document.getElementById(round.a).classList.add('winner');
+        } else if (scoreB > scoreA) {
+          document.getElementById(round.b).classList.add('winner');
+        }
+      });
+    }
+    
+    // Update display with data (Using in-memory storage instead of localStorage)
+    let gameData = {
+      winnerName: "TEAM ALPHA",
+      teamAName: "TEAM ALPHA",
+      teamBName: "TEAM BETA",
+      round1ScoreA: "85",
+      round1ScoreB: "70",
+      round2ScoreA: "92",
+      round2ScoreB: "88",
+      round3ScoreA: "78",
+      round3ScoreB: "95"
+    };
+    
+    function updateDisplay() {
+      // Get winner name
+      document.getElementById("winnerName").innerText = gameData.winnerName;
+      
+      // Update Round 1
+      document.getElementById("teamA1").innerText = gameData.teamAName;
+      document.getElementById("teamB1").innerText = gameData.teamBName;
+      document.getElementById("scoreA1").innerText = gameData.round1ScoreA;
+      document.getElementById("scoreB1").innerText = gameData.round1ScoreB;
+      
+      // Update Round 2
+      document.getElementById("teamA2").innerText = gameData.teamAName;
+      document.getElementById("teamB2").innerText = gameData.teamBName;
+      document.getElementById("scoreA2").innerText = gameData.round2ScoreA;
+      document.getElementById("scoreB2").innerText = gameData.round2ScoreB;
+      
+      // Update Round 3
+      document.getElementById("teamA3").innerText = gameData.teamAName;
+      document.getElementById("teamB3").innerText = gameData.teamBName;
+      document.getElementById("scoreA3").innerText = gameData.round3ScoreA;
+      document.getElementById("scoreB3").innerText = gameData.round3ScoreB;
+      
+      // Highlight winning teams
+      highlightWinningTeams();
+    }
+    
+    // Initialize everything when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      createParticles();
+      createConfetti();
+      updateDisplay();
+      
+      // Create more confetti every 5 seconds
+      setInterval(createConfetti, 5000);
+    });
+    
+    // Update display every 500ms
+    setInterval(updateDisplay, 500);
+
+    function redirectToViewer() {
+        window.location.href = "{% url 'viewer' %}";
+    }
+  </script>
+</body>
+</html>

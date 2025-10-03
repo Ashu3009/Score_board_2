@@ -39,6 +39,7 @@
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
         }
 
+
         .logo-btn:hover {
             transform: scale(1.1);
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
@@ -49,14 +50,45 @@
             height: 100%;
             object-fit: cover;
         }
-    </style>
+
+
+       /* redirect to winner using logo2-btn */
+        .logo2-btn {
+            position: fixed;
+            top: 80px;
+            right: 33px;
+            z-index: 1000;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .logo2-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+        }
+
+</style>
 </head>
 <body>
     <!-- Logo button (redirect) -->
     <button class="logo-btn" onclick="redirectToVideo()">
         <img src="{% static 'test_7/photos/circular-logo.png' %}" alt="DroneNova Logo">
     </button>
-    
+
+
+    <!-- Logo button (redirect to winner) -->
+    <!-- <button class="logo2-btn" onclick="redirectTowinner()">Hii</button> -->
+
+
+
     <!-- Background video -->
     <video id="myVideo" autoplay muted loop>
         <source src="{% static 'test_7/videos/sample.mp4' %}" type="video/mp4">
@@ -92,9 +124,13 @@
 
         // Redirect function
         function redirectToVideo() {
-            window.location.href = "{% url 'viewer' %}";
+            window.location.href = "{% url 'winner' %}";
         }
-    </script>
+
+        // function redirectTowinner() {
+        //     window.location.href = "{% url 'winner' %}";
+        // }
+</script>
 </body>
 </html>
 
